@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Trainer Login</h2>
+  <p class="muted">
+    Use the shared trainer account to access the trainer dashboard.
+  </p>
+
+  <form method="post" class="form card">
+    <div class="form-row">
+      <label>Username
+        <input type="text" name="username" required>
+      </label>
+    </div>
+    <div class="form-row">
+      <label>Password
+        <input type="password" name="password" required>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn primary">Log in</button>
+      <a href="{{ url_for('index') }}" class="btn secondary">Cancel</a>
+    </div>
+  </form>
+
+  <p class="muted tiny">
+    Default trainer credentials (for demo): <code>trainer</code> / <code>fitness123</code><br>
+    You can change these in <code>web_app.py</code>.
+  </p>
+{% endblock %}

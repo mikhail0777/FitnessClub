@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Trainer Dashboard</h2>
+  <p class="muted">
+    View trainers and upcoming personal training sessions.
+  </p>
+
+  <section class="grid">
+    <article class="card">
+      <h3>Trainers</h3>
+      {% if trainers %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Specialty</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in trainers %}
+            <tr>
+              <td>{{ t.id }}</td>
+              <td>{{ t.full_name }}</td>
+              <td>{{ t.specialty }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted small">No trainer data yet (or trainer table not set up).</p>
+      {% endif %}
+
+      <p class="muted tiny">
+        Tip: you can seed fake trainers in your <code>trainers</code> table for demo.
+      </p>
+    </article>
+
+    <article class="card">
+      <h3>Upcoming PT sessions</h3>
+      {% if sessions %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Member</th>
+              <th>Trainer</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in sessions %}
+            <tr>
+              <td>{{ s.id }}</td>
+              <td>{{ s.member_name }}</td>
+              <td>{{ s.trainer_name }}</td>
+              <td>{{ s.session_date }}</td>
+              <td>{{ s.session_time }}</td>
+              <td>{{ s.status }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted small">
+          No upcoming sessions found. Add data below to populate this table.
+        </p>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="card" style="margin-top: 1.5rem;">
+    <h3>Add new PT session</h3>
+    <p class="muted tiny">
+      Now using dropdowns backed by your database for both members and trainers.
+    </p>
+
+    <form method="post" action="{{ url_for('trainer_add_session') }}" class="form">
+      <div class="form-row two-col">
+        <label>Member
+          <select name="member_id" required>
+            <option value="" disabled selected>Select member</option>
+            {% for m in members %}
+            <option value="{{ m.id }}">
+              {{ m.full_name }} (ID {{ m.id }})
+            </option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label>Trainer
+          <select name="trainer_id" required>
+            <option value="" disabled selected>Select trainer</option>
+            {% for t in trainers %}
+            <option value="{{ t.id }}">
+              {{ t.full_name }} (ID {{ t.id }})
+            </option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+
+      <div class="form-row two-col">
+        <label>Date
+          <input type="date" name="session_date" required>
+        </label>
+        <label>Time
+          <input type="time" name="session_time" required>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label>Status
+          <input type="text" name="status" placeholder="scheduled / completed / cancelled">
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn primary">Add Session</button>
+      </div>
+    </form>
+  </section>
+{% endblock %}
+
+

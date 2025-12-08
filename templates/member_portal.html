@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Member Portal</h2>
+  <p class="muted">
+    Enter your member ID or email to open your dashboard.
+  </p>
+
+  <form method="post" class="form card">
+    <div class="form-row">
+      <label>Member ID or email
+        <input type="text" name="lookup" required placeholder="e.g. 3 or bob@example.com">
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn primary">Open Dashboard</button>
+      <a href="{{ url_for('index') }}" class="btn secondary">Back</a>
+    </div>
+  </form>
+{% endblock %}

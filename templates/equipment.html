@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Equipment Rentals</h2>
+  <p class="muted">
+    Track your fitness equipment inventory and rentals.
+  </p>
+
+  <section class="grid">
+    <article class="card">
+      <h3>Inventory</h3>
+      {% if equipment %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Total</th>
+              <th>Available</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in equipment %}
+            <tr>
+              <td>{{ e.name }}</td>
+              <td>{{ e.category or "—" }}</td>
+              <td>{{ e.total_quantity }}</td>
+              <td>{{ e.available_quantity }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted small">No equipment added yet.</p>
+      {% endif %}
+    </article>
+
+    <article class="card">
+      <h3>Active rentals</h3>
+      {% if active_rentals %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Equipment</th>
+              <th>Rented on</th>
+              <th>Due on</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in active_rentals %}
+            <tr>
+              <td>{{ r.member_name }}</td>
+              <td>{{ r.equipment_name }}</td>
+              <td>{{ r.rented_on }}</td>
+              <td>{{ r.due_on or "—" }}</td>
+              <td>
+                <form method="post" action="{{ url_for('return_equipment', rental_id=r.id) }}">
+                  <button type="submit" class="btn secondary" style="font-size: 0.8rem;">Mark returned</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted small">No active rentals.</p>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="grid" style="margin-top: 1.5rem;">
+    <article class="card">
+      <h3>Add equipment</h3>
+      <form method="post" action="{{ url_for('add_equipment') }}" class="form">
+        <div class="form-row">
+          <label>Name
+            <input type="text" name="name" required>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Category
+            <input type="text" name="category" placeholder="e.g., Cardio, Strength, Accessories">
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Total quantity
+            <input type="number" name="total_quantity" min="1" value="1" required>
+          </label>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Add Equipment</button>
+        </div>
+      </form>
+    </article>
+
+    <article class="card">
+      <h3>Rent equipment</h3>
+      <p class="muted tiny">
+        Select a member and an equipment item to create a rental.
+      </p>
+      <form method="post" action="{{ url_for('rent_equipment') }}" class="form">
+        <div class="form-row">
+          <label>Member
+            <select name="member_id" required>
+              <option value="" disabled selected>Select member</option>
+              {% for m in members %}
+              <option value="{{ m.id }}">{{ m.full_name }} (ID {{ m.id }})</option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Equipment
+            <select name="equipment_id" required>
+              <option value="" disabled selected>Select equipment</option>
+              {% for e in equipment %}
+              <option value="{{ e.id }}">
+                {{ e.name }} ({{ e.available_quantity }} available)
+              </option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+        <div class="form-row two-col">
+          <label>Rented on
+            <input type="date" name="rented_on" required>
+          </label>
+          <label>Due on
+            <input type="date" name="due_on">
+          </label>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Create Rental</button>
+        </div>
+      </form>
+    </article>
+  </section>
+{% endblock %}

@@ -1,0 +1,40 @@
+
+{% extends "base.html" %}
+{% block content %}
+  <h2>Member Registration</h2>
+  <p class="muted">Create a new member record in the database.</p>
+
+  <form method="post" class="form card">
+    <div class="form-row">
+      <label>Full name<span class="req">*</span>
+        <input type="text" name="full_name" required>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>Email<span class="req">*</span>
+        <input type="email" name="email" required>
+      </label>
+    </div>
+
+    <div class="form-row two-col">
+      <label>Date of birth
+        <input type="date" name="dob">
+      </label>
+      <label>Gender
+        <input type="text" name="gender" placeholder="e.g., M / F / Non-binary">
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>Phone
+        <input type="text" name="phone">
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn primary">Register member</button>
+      <a href="{{ url_for('index') }}" class="btn secondary">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

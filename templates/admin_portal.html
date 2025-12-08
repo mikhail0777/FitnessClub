@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Admin Dashboard</h2>
+  <p class="muted">High-level overview for admins and a quick look at recent members.</p>
+
+  <section class="grid">
+    <article class="card">
+      <h3>Overview</h3>
+      <div class="stats-row">
+        <div class="stat small">
+          <span class="label">Total members</span>
+          <span class="value">
+            {{ overview.total_members if overview.total_members is not none else "N/A" }}
+          </span>
+        </div>
+        <!-- you can add more cards here later -->
+      </div>
+      <p class="muted tiny">
+        These numbers are pulled live from your <code>members</code> table.
+      </p>
+    </article>
+
+    <article class="card">
+      <h3>Latest members</h3>
+      {% if latest_members %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full name</th>
+              <th>Email</th>
+              <th>DOB</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in latest_members %}
+            <tr>
+              <td>{{ m.id }}</td>
+              <td>{{ m.full_name }}</td>
+              <td>{{ m.email }}</td>
+              <td>{{ m.date_of_birth }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted small">No members found yet.</p>
+      {% endif %}
+    </article>
+  </section>
+{% endblock %}

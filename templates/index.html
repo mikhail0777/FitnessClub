@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="hero">
+    <div class="hero-text">
+      <p class="eyebrow">Database-backed fitness management</p>
+      <h2>Welcome to <span class="accent">FitnessClub</span></h2>
+      <p>
+      <p>
+  Manage member health metrics, personal training sessions, classes, and equipment rentals
+  through a modern web interface backed by a Python/Flask API and a PostgreSQL database.
+</p>
+
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn primary" href="{{ url_for('member_register') }}">Register a Member</a>
+        <a class="btn secondary" href="{{ url_for('member_portal') }}">Open Member Dashboard</a>
+      </div>
+
+      <div class="pill-row">
+        <div class="pill">
+          <span class="pill-label">Members</span>
+          <span class="pill-value">
+            {{ stats.members if stats.members is not none else "—" }}
+          </span>
+        </div>
+        <div class="pill">
+          <span class="pill-label">Trainer tools</span>
+          <span class="pill-value">Beta</span>
+        </div>
+        <div class="pill">
+          <span class="pill-label">Admin</span>
+          <span class="pill-value">Enabled</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-card hero-card-pop">
+      <h3>Quick Stats</h3>
+      <p class="muted small">Pulled live from your database where possible.</p>
+      <ul class="stat-list">
+        <li>
+          <span>Members</span>
+          <strong>{{ stats.members if stats.members is not none else "No data" }}</strong>
+        </li>
+        <li>
+          <span>Active goals</span>
+          <strong>Sample: 47</strong>
+        </li>
+        <li>
+          <span>Classes today</span>
+          <strong>Sample: 9</strong>
+        </li>
+      </ul>
+      <p class="muted tiny">
+        You can later hook these up to real aggregated views (e.g. goals, classes).
+      </p>
+    </div>
+  </section>
+
+  <section class="grid">
+    <article class="card">
+      <h3>Member Portal</h3>
+      <p>Open an existing member dashboard and update their latest metrics.</p>
+      <a class="link" href="{{ url_for('member_portal') }}">Go to Member Portal →</a>
+    </article>
+
+    <article class="card">
+      <h3>Trainer Tools</h3>
+      <p>View trainers and upcoming personal training sessions in one place.</p>
+      <a class="link" href="{{ url_for('trainer_portal') }}">Open Trainer Dashboard →</a>
+    </article>
+
+    <article class="card">
+      <h3>Admin Dashboard</h3>
+      <p>See overall member counts and recent sign-ups for quick reporting.</p>
+      <a class="link" href="{{ url_for('admin_portal') }}">Open Admin Dashboard →</a>
+    </article>
+  </section>
+{% endblock %}
+
+
