@@ -1,106 +1,103 @@
-👤 Author
+👤 Author  
+**Mikhail Simanian** — Full-Stack Developer / Student Entrepreneur  
+📍 Ottawa, Canada — Carleton University  
+📧 miksim077@gmail.com  
 
-Mikhail Simanian — Full-Stack Developer / Student Entrepreneur
-📍 Ottawa, Canada — Carleton University
-📧 miksim077@gmail.com
+---
 
-🏋️‍♂️ FitnessClub — A Database-Backed Gym Management Web Platform
+## 🏋️‍♂️ FitnessClub — Database-Backed Gym Management Web Platform
 
-FitnessClub is a streamlined fitness center management system that helps gyms efficiently track:
+**FitnessClub** is a full-stack fitness center management system designed to help gyms efficiently manage:
 
-✔ Members
-✔ Personal training sessions
-✔ Equipment inventory & rentals
-✔ Administrative insights
+- ✔ Members  
+- ✔ Personal training sessions  
+- ✔ Equipment inventory & rentals  
+- ✔ Administrative insights  
 
-Built using:
+---
 
-🐍 Python (Flask web framework)
+## 🚀 Live Demo
+👉 https://fitnessclub-z0bn.onrender.com
 
-🐘 PostgreSQL (relational database)
+**Demo Trainer Login**
+- Username: `trainer`
+- Password: `fitness123`
 
-🎨 HTML + CSS for clean UI design
+---
 
-This project turns a classic PostgreSQL database assignment into a full web application with real-world workflows and a modern UX.
-🚀 Live Demo (Future Deployment Plan)
+## 🧰 Tech Stack
+- 🐍 **Python (Flask)** — backend & routing  
+- 🐘 **PostgreSQL** — relational database  
+- 🎨 **HTML + CSS** — clean, responsive UI  
+- ☁️ **Render** — cloud deployment  
 
-✨ Feature Overview
-Role	Capabilities
-Members	Track profile data, register, log workouts (future)
-Trainers	View members, assign PT sessions, track schedule
-Admin	View dashboards, manage database statistics
-Staff	Rent out equipment, update availability
+This project extends a PostgreSQL database assignment into a **fully deployed web application** with real-world workflows and persistent cloud data.
 
-Additional highlights:
+---
 
-📊 Dashboard analytics pulling real database counts
+## ✨ Feature Overview
 
-🏷 Organized equipment categories + rental tracking
+### Role Capabilities
 
-🔐 Separate trainer login page
+**Members**
+- Register and view profile data
+- Access personal dashboard
 
-🧱 Clean and scalable SQL schema
+**Trainers**
+- View members
+- Create and manage personal training sessions
+- Track upcoming schedules
 
-🔮 Roadmap / Future Enhancements
-Status	Upcoming Feature
-⏳ Planned	Class scheduling & enrollment
-⏳ Planned	Embedded charts on dashboards
-⏳ Planned	Member progress tracking (goals, metrics)
-⏳ Planned	Admin authentication and roles system
-⏳ Planned	Cloud hosting + demo login
-🧠 Purpose
+**Staff / Equipment Management**
+- View equipment inventory
+- Rent and return equipment
+- Automatic availability tracking
 
+**Admin**
+- Dashboard with real database statistics
+- Recent member overview
+
+---
+
+## ⭐ Highlights
+- 📊 Live dashboard analytics pulled from PostgreSQL
+- 🏷 Equipment categorization with rental lifecycle tracking
+- 🔐 Separate trainer authentication flow
+- 🧱 Clean, normalized SQL schema
+- 🔄 Transaction-safe inventory updates
+
+---
+
+## 🔮 Roadmap / Future Enhancements
+- Class scheduling & enrollment
+- Data visualizations (charts & trends)
+- Member goal & progress tracking
+- Role-based admin authentication
+- Expanded analytics
+
+---
+
+## 🧠 Purpose
 This project demonstrates:
+- ✔ Full-stack web development
+- ✔ Relational data modeling & SQL
+- ✔ CRUD operations with a real UI
+- ✔ Cloud deployment & environment configuration
 
-✔ Full-stack software design
-✔ Data modeling + SQL logic
-✔ CRUD operations with real UI
-✔ Clean workflow for gyms & institutions
+It showcases how an academic database can be turned into a **real, usable product** suitable for portfolio and internship evaluation.
 
-Turned an academic database into a real usable product.
-Showcases strong backend development, database integration, and UI design skills.
+---
 
-----------------------------------------
-🛠️ Local Setup & Running the App
+## 🛠️ Local Setup
 
-You need:
+### Requirements
+- Python 3.11+
+- PostgreSQL 14+
+- Local database named `FitnessClub`
 
-✔ Python 3.11+
-✔ PostgreSQL 14+ installed
-✔ A local database named: FitnessClub
+### Setup Steps
 
-1️⃣ Clone the repo
+```bash
 git clone https://github.com/mikhail0777/FitnessClub.git
 cd FitnessClub
-
-2️⃣ Install backend dependencies
 pip install -r requirements.txt
-
-3️⃣ Import the database schema + demo data
-
-Inside PostgreSQL / pgAdmin:
-
-1️⃣ Run sql/DDL.sql → creates tables
-2️⃣ Run sql/seed_demo_data.sql → fills demo members, trainers, equipment
-
-4️⃣ Start the Flask server
-python app/web_app.py
-
-
-📌 The app runs at:
-👉 http://127.0.0.1:5000/
-
-📂 Project Structure
-FitnessClub/
-│ app/
-│ ├─ main.py
-│ ├─ web_app.py        # Main Flask app
-│ sql/
-│ ├─ DDL.sql           # Database schema
-│ ├─ seed_demo_data.sql # Demo test data
-│ templates/            # HTML Templates (Jinja2)
-│ static/
-│ ├─ styles.css         # UI Stylesheet
-│ requirements.txt
-│ README.md
-
