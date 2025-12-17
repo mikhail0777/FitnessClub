@@ -1,3 +1,4 @@
+import os
 from flask import (
     Flask,
     render_template,
@@ -10,19 +11,32 @@ from flask import (
 import psycopg2
 import psycopg2.extras
 
-# --- Database config (change if needed) ---
-DB_NAME = "FitnessClub"
-DB_USER = "postgres"
-DB_PASSWORD = "comp3005"
-DB_HOST = "localhost"
-DB_PORT = "5432"
+# ----------------- CONFIG -----------------
+
+# Local dev defaults (only used if DATABASE_URL is NOT set)
+DB_NAME = os.environ.get("DB_NAME", "FitnessClub")
+DB_USER = os.environ.get("DB_USER", "postgres")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "comp3005")
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_PORT = os.environ.get("DB_PORT", "5432")
+
+# Cloud/hosted DB connection string (Render/Railway standard)
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 # Simple trainer login (shared credentials)
-TRAINER_USERNAME = "trainer"
-TRAINER_PASSWORD = "fitness123"
+TRAINER_USERNAME = os.environ.get("TRAINER_USERNAME", "trainer")
+TRAINER_PASSWORD = os.environ.get("TRAINER_PASSWORD", "fitness123")
 
 
 def get_connection():
+    """
+    Uses DATABASE_URL if provided (deployment),
+    otherwise uses local dev credentials.
+    """
+    if DATABASE_URL:
+        # Render/Railway provide a full connection URL
+        return psycopg2.connect(DATABASE_URL)
+
     return psycopg2.connect(
         dbname=DB_NAME,
         user=DB_USER,
@@ -37,7 +51,9 @@ app = Flask(
     template_folder="../templates",
     static_folder="../static",
 )
-app.secret_key = "supersecret"  # change for production
+
+# Use env secret key in production; fallback for local dev
+app.secret_key = os.environ.get("SECRET_KEY", "supersecret")
 
 
 # ----------------- HOME / STATS -----------------
@@ -45,14 +61,10 @@ app.secret_key = "supersecret"  # change for production
 
 @app.route("/")
 def index():
-    """
-    Home page with quick stats.
-    Right now we pull live member count from the DB.
-    """
     stats = {
         "members": None,
-        "active_goals": None,   # placeholder for later
-        "classes_today": None,  # placeholder for later
+        "active_goals": None,
+        "classes_today": None,
     }
 
     try:
@@ -71,10 +83,6 @@ def index():
 
 @app.route("/members/portal", methods=["GET", "POST"])
 def member_portal():
-    """
-    Simple member portal: user enters member ID OR email,
-    and we redirect them to their dashboard.
-    """
     if request.method == "POST":
         lookup = request.form.get("lookup", "").strip()
 
@@ -84,10 +92,7 @@ def member_portal():
 
         try:
             with get_connection() as conn:
-                with conn.cursor(
-                    cursor_factory=psycopg2.extras.DictCursor
-                ) as cur:
-                    # If all digits, treat as ID, otherwise treat as email
+                with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
                     if lookup.isdigit():
                         cur.execute(
                             "SELECT id FROM members WHERE id = %s;",
@@ -152,10 +157,7 @@ def member_register():
 def member_dashboard(member_id):
     try:
         with get_connection() as conn:
-            with conn.cursor(
-                cursor_factory=psycopg2.extras.DictCursor
-            ) as cur:
-                # assumes you already created a view called member_dashboard
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
                 cur.execute(
                     "SELECT * FROM member_dashboard WHERE member_id = %s;",
                     (member_id,),
@@ -241,11 +243,6 @@ def trainer_logout():
 
 @app.route("/trainer")
 def trainer_portal():
-    """
-    Trainer dashboard.
-    Shows trainers + upcoming PT sessions if those tables exist.
-    Requires trainer login.
-    """
     if not session.get("trainer_logged_in"):
         flash("Please log in as trainer to view that page.", "error")
         return redirect(url_for("trainer_login"))
@@ -256,10 +253,7 @@ def trainer_portal():
 
     try:
         with get_connection() as conn:
-            with conn.cursor(
-                cursor_factory=psycopg2.extras.DictCursor
-            ) as cur:
-                # Trainers
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
                 cur.execute(
                     """
                     SELECT id, full_name, specialty
@@ -269,7 +263,6 @@ def trainer_portal():
                 )
                 trainers = cur.fetchall()
 
-                # Members for dropdown
                 cur.execute(
                     """
                     SELECT id, full_name
@@ -279,7 +272,6 @@ def trainer_portal():
                 )
                 members = cur.fetchall()
 
-                # Upcoming sessions
                 cur.execute(
                     """
                     SELECT
@@ -310,9 +302,6 @@ def trainer_portal():
 
 @app.route("/trainer/sessions/add", methods=["POST"])
 def trainer_add_session():
-    """
-    Simple form for trainers to create a personal training session.
-    """
     if not session.get("trainer_logged_in"):
         flash("Trainer login required.", "error")
         return redirect(url_for("trainer_login"))
@@ -348,11 +337,6 @@ def trainer_add_session():
 
 @app.route("/admin")
 def admin_portal():
-    """
-    Basic admin tools:
-    - overview with total members
-    - table of latest members
-    """
     overview = {
         "total_members": None,
     }
@@ -360,9 +344,7 @@ def admin_portal():
 
     try:
         with get_connection() as conn:
-            with conn.cursor(
-                cursor_factory=psycopg2.extras.DictCursor
-            ) as cur:
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
                 cur.execute("SELECT COUNT(*) AS total_members FROM members;")
                 overview["total_members"] = cur.fetchone()["total_members"]
 
@@ -390,20 +372,13 @@ def admin_portal():
 
 @app.route("/equipment")
 def equipment_portal():
-    """
-    Equipment inventory + rentals.
-    Anyone can view; rentals are tied to members.
-    """
     equipment = []
     active_rentals = []
     members = []
 
     try:
         with get_connection() as conn:
-            with conn.cursor(
-                cursor_factory=psycopg2.extras.DictCursor
-            ) as cur:
-                # Equipment list
+            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
                 cur.execute(
                     """
                     SELECT id, name, category, total_quantity, available_quantity
@@ -413,7 +388,8 @@ def equipment_portal():
                 )
                 equipment = cur.fetchall()
 
-                # Active rentals (not yet returned)
+                # IMPORTANT: expects columns rented_on, due_on, returned_on
+                # (rename columns in DB if needed)
                 cur.execute(
                     """
                     SELECT
@@ -431,7 +407,6 @@ def equipment_portal():
                 )
                 active_rentals = cur.fetchall()
 
-                # Members for dropdown
                 cur.execute(
                     """
                     SELECT id, full_name
@@ -500,7 +475,6 @@ def rent_equipment():
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
-                # Check availability
                 cur.execute(
                     "SELECT available_quantity FROM equipment WHERE id = %s FOR UPDATE;",
                     (equipment_id,),
@@ -515,7 +489,6 @@ def rent_equipment():
                     flash("No units available for that equipment.", "error")
                     return redirect(url_for("equipment_portal"))
 
-                # Insert rental
                 cur.execute(
                     """
                     INSERT INTO equipment_rentals
@@ -525,7 +498,6 @@ def rent_equipment():
                     (member_id, equipment_id, rented_on, due_on),
                 )
 
-                # Decrease available quantity
                 cur.execute(
                     """
                     UPDATE equipment
@@ -549,7 +521,6 @@ def return_equipment(rental_id):
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
-                # Find which equipment this rental is for
                 cur.execute(
                     """
                     SELECT equipment_id
@@ -565,7 +536,6 @@ def return_equipment(rental_id):
 
                 equipment_id = row[0]
 
-                # Mark as returned today
                 cur.execute(
                     """
                     UPDATE equipment_rentals
@@ -575,7 +545,6 @@ def return_equipment(rental_id):
                     (rental_id,),
                 )
 
-                # Increase available quantity
                 cur.execute(
                     """
                     UPDATE equipment
@@ -595,7 +564,6 @@ def return_equipment(rental_id):
 
 
 # ----------------- MAIN -----------------
-
 
 if __name__ == "__main__":
     app.run(debug=True)
