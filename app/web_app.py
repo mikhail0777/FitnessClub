@@ -369,6 +369,8 @@ def admin_portal():
 
 # ----------------- EQUIPMENT INVENTORY & RENTALS -----------------
 
+# ----------------- EQUIPMENT INVENTORY & RENTALS -----------------
+
 
 @app.route("/equipment")
 def equipment_portal():
@@ -379,6 +381,7 @@ def equipment_portal():
     try:
         with get_connection() as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                # Equipment list
                 cur.execute(
                     """
                     SELECT id, name, category, total_quantity, available_quantity
@@ -388,25 +391,25 @@ def equipment_portal():
                 )
                 equipment = cur.fetchall()
 
-                # IMPORTANT: expects columns rented_on, due_on, returned_on
-                # (rename columns in DB if needed)
+                # Active rentals (Render DB schema)
                 cur.execute(
                     """
                     SELECT
                         er.id,
                         m.full_name AS member_name,
                         e.name AS equipment_name,
-                        er.rented_on,
-                        er.due_on
+                        er.rental_date,
+                        er.return_due_date
                     FROM equipment_rentals er
                     JOIN members m ON er.member_id = m.id
                     JOIN equipment e ON er.equipment_id = e.id
-                    WHERE er.returned_on IS NULL
-                    ORDER BY er.rented_on DESC;
+                    WHERE er.returned_at IS NULL
+                    ORDER BY er.rental_date DESC;
                     """
                 )
                 active_rentals = cur.fetchall()
 
+                # Members dropdown
                 cur.execute(
                     """
                     SELECT id, full_name
@@ -465,39 +468,43 @@ def add_equipment():
 def rent_equipment():
     member_id = request.form.get("member_id")
     equipment_id = request.form.get("equipment_id")
-    rented_on = request.form.get("rented_on")
-    due_on = request.form.get("due_on") or None
 
-    if not member_id or not equipment_id or not rented_on:
-        flash("Member, equipment, and rented-on date are required.", "error")
+    # Accept BOTH old + new form names
+    rental_date = request.form.get("rental_date") or request.form.get("rented_on")
+    return_due_date = (
+        request.form.get("return_due_date")
+        or request.form.get("due_on")
+        or None
+    )
+
+    if not member_id or not equipment_id or not rental_date:
+        flash("Member, equipment, and rental date are required.", "error")
         return redirect(url_for("equipment_portal"))
 
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
+                # Lock row and check availability
                 cur.execute(
                     "SELECT available_quantity FROM equipment WHERE id = %s FOR UPDATE;",
                     (equipment_id,),
                 )
                 row = cur.fetchone()
-                if not row:
-                    flash("Equipment not found.", "error")
-                    return redirect(url_for("equipment_portal"))
-
-                available = row[0]
-                if available <= 0:
+                if not row or row[0] <= 0:
                     flash("No units available for that equipment.", "error")
                     return redirect(url_for("equipment_portal"))
 
+                # Insert rental (Render schema)
                 cur.execute(
                     """
                     INSERT INTO equipment_rentals
-                        (member_id, equipment_id, rented_on, due_on)
+                        (member_id, equipment_id, rental_date, return_due_date)
                     VALUES (%s, %s, %s, %s);
                     """,
-                    (member_id, equipment_id, rented_on, due_on),
+                    (member_id, equipment_id, rental_date, return_due_date),
                 )
 
+                # Decrement stock
                 cur.execute(
                     """
                     UPDATE equipment
@@ -521,11 +528,12 @@ def return_equipment(rental_id):
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
+                # Find rental
                 cur.execute(
                     """
                     SELECT equipment_id
                     FROM equipment_rentals
-                    WHERE id = %s AND returned_on IS NULL;
+                    WHERE id = %s AND returned_at IS NULL;
                     """,
                     (rental_id,),
                 )
@@ -536,15 +544,17 @@ def return_equipment(rental_id):
 
                 equipment_id = row[0]
 
+                # Mark returned
                 cur.execute(
                     """
                     UPDATE equipment_rentals
-                    SET returned_on = CURRENT_DATE
+                    SET returned_at = CURRENT_DATE
                     WHERE id = %s;
                     """,
                     (rental_id,),
                 )
 
+                # Increment stock
                 cur.execute(
                     """
                     UPDATE equipment
@@ -561,6 +571,7 @@ def return_equipment(rental_id):
         flash("Database error while returning equipment.", "error")
 
     return redirect(url_for("equipment_portal"))
+
 
 
 # ----------------- MAIN -----------------
